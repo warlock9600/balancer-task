@@ -1,26 +1,33 @@
-nginx:
-  image: umputun/nginx-le:latest
-  restart: unless-stopped
-  logging:
-    driver: json-file
-    options:
-      max-size: "10m"
-      max-file: "5"
-  volumes:
-    - ./ssl:/etc/nginx/ssl
-    - ./index.html:/srv/docroot/project1/index.html
-  ports:
-    - 80:80
-    - 443:443
-  environment:
-    - TZ=Europe/Moscow
-    - LETSENCRYPT=true
-    - LE_EMAIL=tech-support@nevatrip.ru
-    - LE_FQDN=project1.nevatrip.ru
-  tty: true
-  networks:
-    - project1-network
+services:  
+  
+  nginx:
+    image: umputun/nginx-le:latest
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    volumes:
+    #  - ./ssl:/etc/nginx/ssl
+      - ./index.html:/srv/docroot/project1/index.html
+    # ports:
+    #   - 80:80
+    #   - 443:443
+    environment:
+      - TZ=Europe/Moscow
+      # - LETSENCRYPT=true
+      # - LE_EMAIL=tech-support@nevatrip.ru
+      # - LE_FQDN=project1.nevatrip.ru
+    tty: true
+    networks:
+      - projects
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.proj1.rule=Host(`contoso.com`)"
+      - "traefik.http.routers.proj1.entrypoints=websecure"
+      - "traefik.http.routers.proj1.tls.certresolver=myresolver"
+      - "traefik.http.routers.proj1.tls=true"
 
 networks:
-  project1-network:
-    driver: bridge
+  projects:

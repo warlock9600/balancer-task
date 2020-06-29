@@ -1,14 +1,56 @@
-nginx:
-  image: umputun/nginx-le:latest
-  restart: unless-stopped
-  logging:
-    driver: json-file
-    options:
-      max-size: "10m"
-      max-file: "5"
-  ports:
-    - 80:80
-    - 443:443
-  environment:
-    - TZ=Europe/Moscow
-  tty: true
+services:
+
+  traefik:
+    image: "traefik:v2.2"
+    container_name: "traefik"
+    networks:
+      - projects
+    command:
+#      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # первый резолвер сертификатов, с проверкой подлинности через апи клаудфлейра
+      - "--certificatesresolvers.myresolver.acme.dnschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.myresolver.acme.email=user@contoso.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      # второй резолвер, с проверкой http-запросом.
+      # соотв, чтоб это сработало, надо чтоб была dns-запись с указанием проверяемого домена, 
+      # ведущая на сервер, с которого проверка и выполняется 
+      - "--certificatesresolvers.evilcorp.acme.httpchallenge=true"
+      - "--certificatesresolvers.evilcorp.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.evilcorp.acme.email=postmaster@superevilmegacorp.com"
+      - "--certificatesresolvers.evilcorp.acme.storage=/letsencrypt/acme.json"
+    ports:
+    # точки входа
+      - "80:80"
+      - "443:443"
+    # дашборд траефика
+      - "8080:8080"
+    environment:
+      - "CF_API_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      - "CF_API_EMAIL=user@contoso.com"
+    volumes:
+      - "/root/letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+networks:
+  projects:
+
+# nginx:
+  # image: umputun/nginx-le:latest
+  # restart: unless-stopped
+  # logging:
+    # driver: json-file
+    # options:
+      # max-size: "10m"
+      # max-file: "5"
+  # ports:
+    # - 80:80
+    # - 443:443
+  # environment:
+    # - TZ=Europe/Moscow
+  # tty: true
