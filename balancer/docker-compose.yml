@@ -6,6 +6,7 @@ services:
     networks:
       - projects
     command:
+    # для дебага можно раскомментить, он будет активнее комментирвоать происходящее
 #      - "--log.level=DEBUG"
       - "--api.insecure=true"
       - "--providers.docker=true"
@@ -25,7 +26,7 @@ services:
       - "--certificatesresolvers.evilcorp.acme.email=postmaster@superevilmegacorp.com"
       - "--certificatesresolvers.evilcorp.acme.storage=/letsencrypt/acme.json"
     ports:
-    # точки входа
+    # порты для точек входа
       - "80:80"
       - "443:443"
     # дашборд траефика

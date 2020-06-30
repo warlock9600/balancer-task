@@ -24,8 +24,10 @@ services:
       - projects
     labels:
       - "traefik.enable=true"
+      # ниже 4 параметра, чтоб случилась магия. первый - объявляет fqdn хоста, который будет выпущен наружу
       - "traefik.http.routers.proj1.rule=Host(`contoso.com`)"
       - "traefik.http.routers.proj1.entrypoints=websecure"
+      # а этот указывает, каким резолвером сертификатов пользоваться
       - "traefik.http.routers.proj1.tls.certresolver=myresolver"
       - "traefik.http.routers.proj1.tls=true"
 
